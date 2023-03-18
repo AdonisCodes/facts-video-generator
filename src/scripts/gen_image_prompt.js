@@ -1,7 +1,7 @@
 import { Configuration, OpenAIApi } from "openai";
 
 export async function getImagePrompt(fact) {
-    const config = new Configuration({apiKey: "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"})
+    const config = new Configuration({apiKey: "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"})
     const openai = new OpenAIApi(config);
 
     const textProompt = await openai.createChatCompletion({
@@ -13,7 +13,7 @@ export async function getImagePrompt(fact) {
     console.log(proompt)
 
     const response = await openai.createImage({
-        prompt:proompt,
+        prompt:`${proompt}, hyper-realistic`,
         n: 1,
         size:"256x256"
     })
