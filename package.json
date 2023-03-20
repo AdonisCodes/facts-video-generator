@@ -10,14 +10,16 @@
     "get-audio-duration": "^3.1.1",
     "image-downloader": "^4.3.0",
     "openai": "^3.2.1",
+    "prompt-sync": "^4.2.0",
     "request": "^2.88.2",
     "say": "^0.16.0",
-    "videoshow": "^0.1.12"
+    "videoshow": "^0.1.12",
+    "wait": "^0.4.2"
   },
   "type": "module",
   "name": "facts-video-generator",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

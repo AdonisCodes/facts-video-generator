@@ -4,25 +4,30 @@ import { getImagePrompt } from "./scripts/gen_image_prompt.js";
 import { convertToTTS } from "./scripts/tts.js";
 import { createRequire } from "module";
 import { createClips } from "./scripts/create-clips.js";
+import wait from "wait";
+import { combineClips } from "./scripts/combine-clip.js";
+import { addBackground } from "./scripts/background-footage-adder.js";
+import { config } from "./config.js"
 const require = createRequire(import.meta.url)
 const { getAudioDurationInSeconds } = require("get-audio-duration")
 var fs = require('fs'),
 request = require('request');
 
 
-async function main() {
-  let factsTotal = 2
-  let facts = await fetchFacts(factsTotal, "yf7Dn/+knNB2htA9qjGvKg==uFJOoL5XJpsoARSH");
+export async function main() {
+  let factsTotal = 3
+  let facts = await fetchFacts(factsTotal, config.apiKeys.apiNinjaAPI);
   let vidData = [];
   
   for (let i = 0; i < facts.length; i++) {
-    let ttsFilePath = convertToTTS(null, facts[i].fact, "/output/tts", i + 1);
+    let ttsFilePath = convertToTTS(config.tts.voice, facts[i].fact, config.tempLocation, i + 1);
     console.log(`Converting fact ${i + 1} out of ${facts.length} to audio and images`);
-    
+    await wait(2000)
+
       let image = await getImagePrompt(facts[i].fact);
-      await download(image, `./output/images/${i}.png`, (e) => {console.log("image downloaded...")})
+      await download(image, config.tempLocation + `${i}.png`, (e) => {console.log("image downloaded...")})
       
-      vidData.push({ index: i + 1, image: `./output/images/${i}.png`, audio: ttsFilePath });
+      vidData.push({ index: i + 1, image: config.tempLocation + `${i}.png`, audio: ttsFilePath });
       
     }
 
@@ -34,12 +39,21 @@ async function main() {
       })
 
       createClips(audioDur, vidData[i].image, vidData[i].audio, i)
+      await wait(15000)
     }
+    
+    console.log("Combining clips....")
+    await wait(20000)
+
+    combineClips({path: config.tempLocation, len: vidData.length})
+    await wait(10000)
+    addBackground()
+
   }
 
   
 
-main();
+// main();
 
 // util funcitons
 
@@ -47,4 +61,6 @@ async function download(uri, filename, callback){
   request.head(uri, function(err, res, body){
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
   });
+
+  await wait(10000)
 };
