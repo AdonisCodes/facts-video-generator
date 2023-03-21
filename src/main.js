@@ -73,7 +73,7 @@ export async function main() {
     })
 
       // use videowshow to combine the audio and photo clips into videos
-      createClips(audioDur, vidData[i].image, vidData[i].audio, i)
+      createClips(audioDur, config.tempLocation, i)
       await wait(15000)
 
       // divider to announse another action was succesfully completed
@@ -85,6 +85,7 @@ export async function main() {
     console.log("Combining clips....")
     await wait(20000)
 
+    // * TODO: make the output path dynamic
     combineClips({path: config.tempLocation, len: vidData.length})
     await wait(10000)
 
