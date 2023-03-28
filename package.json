@@ -6,6 +6,7 @@
     "ffcreatorlite": "^2.5.1",
     "ffmpeg": "^0.0.4",
     "ffmpeg-installer": "^1.0.2",
+    "file-system": "^2.2.2",
     "fluent-ffmpeg": "^2.1.2",
     "get-audio-duration": "^3.1.1",
     "image-downloader": "^4.3.0",

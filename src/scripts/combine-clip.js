@@ -16,7 +16,19 @@ export async function combineClips(clipOutputPath) {
     // use ffmpeg.mergetofile() method and merhe them into the final mask
     clips.mergeToFile("./output/temp/mask.mp4", "./output/temp")
 
-    await wait(40000)
+    await wait(70000)
+
+    let dur = ffmpeg.ffprobe("./output/temp/mask.mp4", (err, metadata) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        const duration = metadata.format.duration;
+        return duration
+      });
+      
+      console.log(dur)
+      return dur
 }
 
-// combineClips({len: 3, path: "./output/temp"})
+// combineClips({len: 1, path: "./output/temp"})

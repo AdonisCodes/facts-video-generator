@@ -9,19 +9,19 @@ import { combineClips } from "./scripts/combine-clip.js";
 import { addBackground } from "./scripts/background-footage-adder.js";
 import { config } from "./config.js"
 import { descriptionGenerator, titleGenerator } from "./scripts/metaDataGen.js";
-
+import { createCaptions } from "./scripts/createCaptions.js";
+import { trim } from "./scripts/trim-video.js";
 // Allow for require statements to be present in modules
 const require = createRequire(import.meta.url)
 const { getAudioDurationInSeconds } = require("get-audio-duration")
-var fs = require('fs'),
-request = require('request');
-
+const fs = require('fs')
+const request = require('request');
+const path = require("path")
 
 // initilize the main function
 export async function main() {
   // define the facts total
-  // * TODO: add facts total to the config file
-  let factsTotal = 3
+  let factsTotal = config.factsTotal
 
   // await a request to the facts
   // * TODO: add a way to request the api key if it wasn't included in the config
@@ -34,7 +34,8 @@ export async function main() {
   // declare the video data and metadata
   // used for other functions to have important information about the video.
   let vidData = [];
-  let vidMetaData = []
+  let vidMetaData = [];
+  let gptPrompt = ' can you use this fact to generate a dall-e image prompt, only give the prompt and nothing else, dont include by "create a Dall-E image of..." or "Image prompt:" or anything indicating that it is a image prompt , and make sure it wont flag any safety systems'
 
   // main loop to convert the facts into tts and to generate the images
   for (let i = 0; i < facts.length; i++) {
@@ -44,13 +45,9 @@ export async function main() {
     await wait(2000)
 
     // make a request to openai's apis to request images
-    // * TODO: add a way to request the api key if it wasn't included in the config
-
-    // * TODO: add a retry feature if the api safety systems were activated by requesting
-    // * a newly generated prompt and retrying
-    
+    // * TODO: add a way to request the api key if it wasn't included in the config    
     // * TODO: add a way to retry if any other erros come up
-    let image = await getImagePrompt(facts[i].fact);
+    let image = await getImagePrompt(facts[i].fact, gptPrompt);
 
     // use a stack overflow ctrl+c -> ctrl+v function; to download images to the temp location
     await download(image, config.tempLocation + `${i}.png`, (e) => {console.log("image downloaded...")})
@@ -86,14 +83,28 @@ export async function main() {
     await wait(20000)
 
     // * TODO: make the output path dynamic
-    combineClips({path: config.tempLocation, len: vidData.length})
+    let mask = await combineClips({path: config.tempLocation, len: vidData.length})
     await wait(10000)
 
     // add the background footage to the mask
     // * TODO: create a funciton to automatically extract a clip from a long video and use it as the background
     // * TODO: create a funciton to add the end screen to the video
-    addBackground()
-    await wait(25000)
+    await addBackground()
+    await wait(80000)
+
+    console.log("Creating Captions...")
+
+    // add captions to the video
+    let dur = 0
+    let f = []
+    for (let i = 0; i < facts.length; i++) {
+      dur += await getAudioDurationInSeconds(config.tempLocation + i + ".wav")
+      f.push(facts[i].fact)
+    }
+    await createCaptions(f.join(" "), Math.floor(dur),``, ``)
+    await wait(50000)
+
+    await trim(mask)
 
     // divider to indicate the end of the end of a succesfull action
     console.log("-----------------------")
@@ -117,7 +128,17 @@ export async function main() {
 
     // to indicate the end of a successfull action
     console.log("-----------------------")
+    console.log("Clearing temp....")
 
+    fs.readdir(config.tempLocation, (err, file) => {
+      for (const f of file) {
+        fs.unlink(path.join(config.tempLocation, f), (e) => {
+          return
+        })
+      }
+    })
+
+    console.log("Temp succesfully cleared...")
   }
 
 // call the main function
