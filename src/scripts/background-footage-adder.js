@@ -9,7 +9,8 @@ export async function addBackground() {
   // there was some many errors that I almost gave up, there is still one more, and that is
   // that the audio doesn't play, I need to go into a video editor and click export, then the audio works when
   // I upload it to youtube, can you explain???
-
+  console.log("Started adding Background Footage...")
+let videoFootageBackground = await new Promise((resolve, reject) => {
   ffmpeg(config.videoGeneration.backgroundFootageLocation + "1.mp4")
     .input(config.tempLocation + "mask.mp4")
     .videoCodec("libx264")
@@ -22,10 +23,18 @@ export async function addBackground() {
     .audioCodec("aac")
     .outputOptions("-ab 128k")
     .output(config.tempLocation + "final0.mp4")
+    .on("end", () => {
+      console.log("Done with background")
+      resolve()
+    })
+    .on("error", (e) => {
+      console.log("A error has occured: " + e)
+      reject(e)
+    })
     .run();
 
-  await wait(30000);
-  console.log("Done with video background...");
+})
+
 }
 
-addBackground();
+// addBackground();

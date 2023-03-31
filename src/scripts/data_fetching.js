@@ -8,15 +8,31 @@ export async function fetchFacts(factsTotal, apiKey) {
         headers: {"X-Api-Key": apiKey}
     }
 
-    // using axios to fetch the facs
+    // using axios to fetch the facts
     console.log("Fetching facts...")
-    let facts = await axios.get(`https://api.api-ninjas.com/v1/facts?limit=${factsTotal}`, config)
 
-    // destructuring the facts to just return the array of facs
-    let result = await facts.data
+    try {
+        const facts = await axios.get(`https://api.api-ninjas.com/v1/facts?limit=${factsTotal}`, config)
+        // destructuring the facts to just return the array of facs
+        const result = await facts.data
+        // returning the result
+        console.log(`Done fetching facts\n ${result[0].fact.slice(0, 20)}...`)
+        return result
+
+    } catch (e) {
+        if (e.response.status == 502) {
+            fetchFacts(factsTotal, apiKey)
+            return
+        }
+
+        if (e.response.status == 400) {
+            fetchFacts(factsTotal, apiKey)
+            console.log("Some Error occured. trying again")
+            return
+        }
+
+    }
+
     
-    console.log(`Done fetching facts\n ${result[0].fact.slice(0, 20)}...`)
 
-    // returning the result
-    return result
 }

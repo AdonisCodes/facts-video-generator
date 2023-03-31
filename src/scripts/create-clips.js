@@ -7,9 +7,9 @@ var videoshow = require('videoshow')
 
 // exported function to create the clips
 export async function createClips(audioDur, temp, i) {
-        
-        // array to spesify where the is
-        let images = [
+        console.log("creating clips")
+        // array to specify where the is
+        const images = [
             `${temp}${i}.png`
         ]
 
@@ -19,6 +19,7 @@ export async function createClips(audioDur, temp, i) {
         loop:audioDur + config.tts.delayAfterSpeak, // seconds
         transition: false, // seconds
         videoBitrate: 1024,
+        transitionDuration:0,
         videoCodec: 'libx264',
         size: '640x?',
         audioBitrate: '128k',
@@ -28,21 +29,25 @@ export async function createClips(audioDur, temp, i) {
         }
 
         // exporting the video
-        let video = videoshow(images, videoOptions)
-        .size("1000x1000")
-        .audio(`${temp}${i}.wav`)
-        .save(config.tempLocation + `${i}.mp4`)
-        .on('start', function (command) {
-            console.log('ffmpeg process started... for video' + i)
+        const video = await new Promise((resolve, reject) => {
+            videoshow(images, videoOptions)
+            .size("1000x1000")
+            .audio(`${temp}${i}.wav`)
+            .save(config.tempLocation + `${i}.mp4`)
+            .on('start', function (command) {
+                console.log('ffmpeg process started... for video' + i)
+            })
+            .on('error', function (err, stdout, stderr) {
+                console.error('Error:', err)
+                console.error('ffmpeg stderr:', stderr)
+                reject()
+            })
+            .on('end', function (output) {
+                console.error('Video ' + i + " created...", output)
+                resolve()
+            })
+
         })
-        .on('error', function (err, stdout, stderr) {
-            console.error('Error:', err)
-            console.error('ffmpeg stderr:', stderr)
-        })
-        .on('end', function (output) {
-            console.error('Video ' + i + " created...", output)
-        })
-        await wait(20000)
 
     }
 

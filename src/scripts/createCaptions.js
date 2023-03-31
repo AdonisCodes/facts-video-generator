@@ -3,13 +3,13 @@ import wait from "wait"
 import { config } from "../config.js"
 
 export async function createCaptions(fact, audioDur, videoLoc, videoFinal) {
-    let caption = fact.split(" ")
-    let textFreq = Math.ceil(caption.length / audioDur)
+    const caption = fact.split(" ")
+    const textFreq = Math.ceil(caption.length / audioDur)
     let wordcount = 0
     let filters = []
     
     for (let i = 0; i < Math.ceil(audioDur); i++) {
-        let captionFragment = caption.slice(wordcount, wordcount + textFreq)
+        const captionFragment = caption.slice(wordcount, wordcount + textFreq)
         wordcount += textFreq
 
         captionFragment.push("😃")
@@ -21,23 +21,27 @@ export async function createCaptions(fact, audioDur, videoLoc, videoFinal) {
     }
 
     console.log(filters)
-    ffmpeg(config.tempLocation + "final0.mp4")
-    .videoFilters(
-        filters
-    )
-    .outputOptions('-c:a copy')
-    .output(config.tempLocation + 'final-1.mp4')
-    .on('end', function() {
-        console.log('Finished processing');
-    })
-    .on('error', function(err, stdout, stderr) {
-        console.log('An error occurred: ' + err.message);
-        console.log('ffmpeg stdout: ' + stdout);
-        console.log('ffmpeg stderr: ' + stderr);
-    })
-    .run();
 
-    await wait(50000)
+    const cappedVideo = await new Promise((resolve, reject) => {
+        ffmpeg(config.tempLocation + "final0.mp4")
+        .videoFilters(
+            filters
+        )
+        .outputOptions('-c:a copy')
+        .output(config.tempLocation + 'final-1.mp4')
+        .on('end', function() {
+            console.log("Finnished Processing the video")
+            resolve()
+        })
+        .on('error', function(err, stdout, stderr) {
+            console.log('An error occurred: ' + err.message);
+            console.log('ffmpeg stdout: ' + stdout);
+            console.log('ffmpeg stderr: ' + stderr);
+            reject()
+        })
+        .run();
+
+    })
 }
 
 // createCaptions("this is teh thing we have been all waiting for", 20, "", "")
