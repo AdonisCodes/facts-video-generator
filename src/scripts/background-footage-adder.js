@@ -28,7 +28,7 @@ let videoFootageBackground = await new Promise((resolve, reject) => {
       resolve()
     })
     .on("error", (e) => {
-      console.log("A error has occured: " + e)
+      console.log("A error has occurred: " + e)
       reject(e)
     })
     .run();
