@@ -36,14 +36,18 @@ export async function getImagePrompt(fact, gptPrompt) {
     console.log("Safety systems was triggered, retrying the geneartion")
     console.log(e.response.status)
 
-    if (e.respone.status == 400) {
+    if (e.response.status == 400) {
         await getImagePrompt(fact, proompt + " .... this prompt creates 400 error in the dalle api, can you reformulate it sothat it does't trigger any safety systems by removing swear words, sensetive phrases and contreversial topic. Only return the newly generated prompt")
         return
     }
 
-    if (e.respone.status == 502) {
+    if (e.response.status == 502) {
         await getImagePrompt(fact, proompt)
         retry += 1
+    }
+
+    if (e.response.status == 429) {
+        await wait(10000)
     }
    }
     // return the image url for download
