@@ -11,6 +11,7 @@ import { config } from "./config.js"
 import { descriptionGenerator, titleGenerator } from "./scripts/metaDataGen.js";
 import { createCaptions } from "./scripts/createCaptions.js";
 import { trim } from "./scripts/trim-video.js";
+import { createFolderStructure } from "./scripts/scructureBuilder.js";
 // Allow for require statements to be present in modules
 const require = createRequire(import.meta.url)
 const { getAudioDurationInSeconds } = require("get-audio-duration")
@@ -20,6 +21,8 @@ const path = require("path")
 
 // initilize the main function
 export async function main() {
+  // create the folder structure
+  createFolderStructure("./output/");
   // define the facts total
   const factsTotal = config.factsTotal
 
@@ -35,7 +38,7 @@ export async function main() {
   // used for other functions to have important information about the video.
   let vidData = [];
   let vidMetaData = [];
-  const gptPrompt = ' can you use this fact to generate a dall-e image prompt, only give the prompt and nothing else, dont include by "create a Dall-E image of..." or "Image prompt:" or anything indicating that it is a image prompt , and make sure it wont flag any safety systems'
+  const gptPrompt = ' write a detailed description in lamans terms describe how the image will look with no facts or any values like dates names or units of something, dont include by "create a Dall-E image of..." or "Image prompt:" or anything indicating that it is a image prompt, dont include picture a ..., and make sure it wont flag any safety systems'
 
   // main loop to convert the facts into tts and to generate the images
   for (let i = 0; i < facts.length; i++) {
@@ -141,7 +144,7 @@ main();
 
 
 // ! util functions
-async function download(uri, filename){
+export async function download(uri, filename){
   // IDK what is going on here, but it works!
   let image = await new Promise((resolve, reject) => {
     request.head(uri, function(err, res, body){
