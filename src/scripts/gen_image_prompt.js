@@ -51,7 +51,6 @@ export async function getImagePrompt(fact, gptPrompt) {
     }
    }
     // return the image url for download
-    console.log(response.data.data[0].url)
     return response.data.data[0].url
 }
 
@@ -71,4 +70,3 @@ async function genPrompt(text) {
     return proompt
 }
 
-// getImagePrompt("sex tits porn pussy vagina", ` can you use this fact to generate a dall-e image prompt, only give the prompt and nothing else, dont include by "create a Dall-E image of..." or "Image prompt:" or anything indicating that it is a image prompt , and make sure it wont flag any safety systems`)

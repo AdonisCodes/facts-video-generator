@@ -24,8 +24,11 @@ export async function main() {
   // create the folder structure
   createFolderStructure("./output/");
   // define the facts total
-  const factsTotal = config.factsTotal
-
+  let factsTotal = config.factsTotal
+  
+  if (factsTotal <= 0) {
+    factsTotal = 1
+  }
   // await a request to the facts
   // * TODO: add a way to request the api key if it wasn't included in the config
   // * TODO: retry on errors if the error wasn't caused by user
@@ -43,6 +46,7 @@ export async function main() {
   // main loop to convert the facts into tts and to generate the images
   for (let i = 0; i < facts.length; i++) {
     // call the convert to tts function, and return the location of the saved tts.wav file
+
     const ttsFilePath = convertToTTS(config.tts.voice, facts[i].fact, config.tempLocation, i);
     console.log(`Converting fact ${i + 1} out of ${facts.length} to audio and images`);
     await wait(2000)
@@ -98,9 +102,12 @@ export async function main() {
     let f = []
     for (let i = 0; i < facts.length; i++) {
       dur += await getAudioDurationInSeconds(config.tempLocation + i + ".wav")
-      f.push(facts[i].fact)
+      let pushable = facts[i].fact
+      pushable.replace(/['"`]/g, "");
+      f.push(pushable)
     }
-    await createCaptions(f.join(" "), mask,``, ``)
+    console.log(f)
+    await createCaptions(f.join(""), Math.ceil(mask),``, ``)
 
     await trim(mask)
 

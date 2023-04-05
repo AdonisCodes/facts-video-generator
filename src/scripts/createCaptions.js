@@ -1,5 +1,4 @@
 import ffmpeg from "fluent-ffmpeg"
-import wait from "wait"
 import { config } from "../config.js"
 
 export async function createCaptions(fact, audioDur, videoLoc, videoFinal) {
@@ -16,7 +15,7 @@ export async function createCaptions(fact, audioDur, videoLoc, videoFinal) {
 
         console.log(captionFragment.join(" "))
         // console.log(currentTime + i + 1)
-        filters.push(`drawtext=fontfile=Lucida Grande Bold.ttf:text=${captionFragment.join(" ")}:fontsize=100:fontcolor=black:x='(main_w/2-text_w/2)':y=1000:borderw=2:bordercolor=black:shadowcolor=black:shadowx=2:shadowy=2:enable='between(t,${i},${i+1})'`)
+        filters.push(`drawtext=fontfile=./Lucida Grande Bold.ttf:text=${captionFragment.join(" ")}:fontsize=100:fontcolor=black:x='(main_w/2-text_w/2)':y=1000:borderw=2:bordercolor=black:shadowcolor=black:shadowx=2:shadowy=2:enable='between(t,${i},${i+1})'`)
       
     }
 
@@ -31,13 +30,12 @@ export async function createCaptions(fact, audioDur, videoLoc, videoFinal) {
         .output(config.tempLocation + 'final-1.mp4')
         .on('end', function() {
             console.log("Finnished Processing the video")
-            resolve()
+            return resolve()
         })
         .on('error', function(err, stdout, stderr) {
             console.log('An error occurred: ' + err.message);
             console.log('ffmpeg stdout: ' + stdout);
             console.log('ffmpeg stderr: ' + stderr);
-            reject()
         })
         .run();
 
